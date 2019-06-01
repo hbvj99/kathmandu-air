@@ -17,46 +17,42 @@
         integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <title>Live Air Pollution | View current air pollution emission and health messages for Kathmandu valley</title>
-    <style>
-        
-
-    </style>
 </head>
 
-<body style="margin: 10px;">
+<body style="margin: 16px;">
     <div class="container-fluid">
-        <a href="https://github.com/login?return_to=%2Fhbvj99%2Fkathmandu_air" class="btn btn-primary text-uppercase"
-            role="button" target="_blank">Fork project</a>
+        <a href="https://github.com/login?return_to=%2Fhbvj99%2Fkathmandu-air" class="btn btn-primary text-center text-uppercase"
+            role="button" target="_blank"><i class="fab fa-github fa-lg"></i> Fork project</a>
     </div>
     <div class="container-fluid">
         <script src="js/canvasjs.min.js"></script></br>
-        <div class="alert alert-warning text-center">
+        <div class="alert alert-warning">
             <h4 class="alert-heading text-uppercase">health message for current air!</h4>
             <div id="health_message" class="card text-justify" style="padding: 30px;">Updating...</div>
         </div>
-        <div id="live_data" class="container-fluid row form-group" style="padding: 10px;">
-            <div class="">
+        <div id="live_data" class="container" style="margin: 13px;padding: 10px;">
+            <div class="form-group d-inline-block">
                 <label for="loc_nm">Location</label>
-                <select id="loc_nm" class="btn btn-outline-secondary dropdown-toggle"
+                <select id="loc_nm" class="btn btn-outline-secondary dropdown-toggle" style="font-size: 15px;"
                     onchange="changeLocation(this.value)" aria-haspopup="true" aria-expanded="false">
                     <option class="dropdown-item" value="Lazimpat Kathmandu" type="button">Durbar Marg, Kathmandu
                     </option>
                     <option class="dropdown-item" value="US Embassy Kathmandu" type="button">Maharajgunj, Kathmandu
                     </option>
                 </select>
-            </div>&nbsp;&nbsp;&nbsp;
-            <div class="">
+            </div>
+            <div class="form-group d-inline-block">
                 <label for="air_properties">Property</label>
-                <select id="air_properties" class="btn btn-outline-secondary dropdown-toggle"
+                <select id="air_properties" class="btn btn-outline-secondary dropdown-toggle" style="font-size: 15px;"
                     onchange="onchangeConc(this.value)" aria-haspopup="true" aria-expanded="false">
                     <option class="dropdown-item" value="AQI" type="button">AQI</option>
                     <option class="dropdown-item" value="Conc" type="button">PM2.5 Raw Concentration</option>
                     <option class="dropdown-item" value="NowCastConc" type="button">PM2.5 NowCast Concentration</option>
                 </select>
-            </div>&nbsp;&nbsp;
-            <div class="">
+            </div>
+            <div class="form-group d-inline-block">
                 <label for="chartType">Chart Type</label>
-                <select id="chartType" class="btn btn-outline-secondary dropdown-toggle"
+                <select id="chartType" class="btn btn-outline-secondary dropdown-toggle" style="font-size: 15px;"
                     onchange="changeType(this.value)" aria-haspopup="true" aria-expanded="false">
                     <option class="dropdown-item" value="column" type="button">Column</option>
                     <option class="dropdown-item" value="bar" type="button">Bar</option>
@@ -80,10 +76,10 @@
         </div>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-10">
-                    <div id="chartContainer" style="height: 410px; width: 100%;"></div>
+                <div class="col-sm-9">
+                    <div id="chartContainer" style="height: 420px; width: 100%;"></div>
                 </div>
-                <div class="col-sm-2"><br><br>
+                <div class="col-sm-3"><br><br>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -119,8 +115,8 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-            <p>Note: Hover over the chart color to display tooltip info. Also, you can save the render information in images or PDF document.</p>
+            </div><br>
+            <div class="alert alert-secondary text-center" style="padding: 5px;">Note: Hover over the chart color to display tooltip info. Also, you can save the render information in images or PDF document.</div>
         </div>
     </div>
 </body>
