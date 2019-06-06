@@ -1,6 +1,8 @@
 # kathmandu-air
 A small project on the use of open data to create effective air pollution awareness among the community. View how the air quality is changing, health effect it offers using chart visualization provided by CanvasJS. You can save the render information in images or PDF document as well. 
 
+Live demo is available at https://vijaypathak.com.np/kathmandu-air/
+
 ## How it works?
 - Fetch open-source data available at <a href="https://www.epa.gov/outdoor-air-quality-data" target="_blank">EPA</a>
 - Render in charts using <a href="https://canvasjs.com/" target="_blank">CanvasJS</a>
