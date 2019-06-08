@@ -49,4 +49,4 @@ Refer <a href="https://airnow.gov/index.cfm?action=aqibasics.aqi" target="_blank
 
 ## License
 
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
+[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](https://github.com/hbvj99/kathmandu-air/blob/master/LICENSE)
