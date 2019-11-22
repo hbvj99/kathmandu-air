@@ -165,16 +165,16 @@ function healthMessage(y) {
     if (y <= 0) {
         return "<div class='text-uppercase'>Error!</div><br/>No data was received from the station";
     } else if (y >= 0 && y <= 50) {
-        return "<div class='text-uppercase'>Good</div><br/>Air quality is considered satisfactory, and air pollution poses little or no risk.";
+        return "<div class='text-uppercase'>Good</div><br/>The AQI value is between 0 and 50. Air quality is satisfactory and poses little or no health risk.";
     } else if (y >= 51 && y <= 100) {
-        return "<div class='text-uppercase'>Moderate</div><br/>Air quality is acceptable; however, for some pollutants there may be a moderate health concern for a very small number of people who are unusually sensitive to air pollution. Active children and adults, and people with respiratory disease, such as asthma, should limit prolonged outdoor exertion.";
+        return "<div class='text-uppercase'>Moderate</div><br/>The AQI is between 51 and 100. Air quality is acceptable; however, pollution in this range may pose a moderate health concern for a very small number of individuals. People who are unusually sensitive to ozone or particle pollution may experience respiratory symptoms.";
     } else if (y >= 101 && y <= 150) {
-        return "<div class='text-uppercase'>Unhealthy for Sensitive Groups</div><br/>Members of sensitive groups may experience health effects. The general public is not likely to be affected. Active children and adults, and people with respiratory disease, such as asthma, should limit prolonged outdoor exertion.";
+        return "<div class='text-uppercase'>Unhealthy for Sensitive Groups</div><br/>When AQI values are between 101 and 150, members of sensitive groups may experience health effects, but the general public is unlikely to be affected.<br><b>Ozone:</b> People with lung disease, children, older adults, and people who are active outdoors are considered sensitive and therefore at greater risk.<br><b>Particle pollution:</b> People with heart or lung disease, older adults, and children are considered sensitive and therefore at greater risk.";
     } else if (y >= 151 && y <= 200) {
-        return "<div class='text-uppercase'>Unhealthy</div><br/>Everyone may begin to experience health effects; members of sensitive groups may experience more serious health effects. Active children and adults, and people with respiratory disease, such as asthma, should avoid prolonged outdoor exertion; everyone else, especially children, should limit prolonged outdoor exertion.";
+        return "<div class='text-uppercase'>Unhealthy</div><br/>Everyone may begin to experience health effects when AQI values are between 151 and 200. Members of sensitive groups may experience more serious health effects.";
     } else if (y >= 201 && y <= 300) {
-        return "<div class='text-uppercase'>Very Unhealthy</div><br/>Health warnings of emergency conditions. The entire population is more likely to be affected. Active children and adults, and people with respiratory disease, such as asthma, should avoid all outdoor exertion; everyone else, especially children, should limit outdoor exertion.";
+        return "<div class='text-uppercase'>Very Unhealthy</div><br/>AQI values between 201 and 300 trigger a health alert, meaning everyone may experience more serious health effects.";
     } else if (y >= 301) {
-        return "<div class='text-uppercase'>Hazardous</div><br/>Health alert: everyone may experience more serious health effects. Everyone should avoid all outdoor exertion."
+        return "<div class='text-uppercase'>Hazardous</div><br/><b>Health alert:</b> AQI values over 300 trigger health warnings of emergency conditions. The entire population is even more likely to be affected by serious health effects."
     }
 }
