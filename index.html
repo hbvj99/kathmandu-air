@@ -1,124 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description"
-        content="AQI Visualization System | Learn, Discover, Share about air pollution in your community">
-    <meta name="author" content="Vijay Pathak">
-    <script src="js/live_visualize.js"></script>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
-        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Air Quality, Pollution Visualization Dashboard | Kathmandu Valley</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
-        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-    <title>Live Air Pollution | View current air pollution emission and health messages for Kathmandu valley</title>
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .chart-container {
+      height: 500px;
+    }
+    .aqi-table-container {
+      height: 500px;
+      overflow-y: auto;
+    }
+    .table-fixed thead th {
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      z-index: 1;
+    }
+  </style>
 </head>
+<body class="bg-light">
 
-<body style="margin: 16px;">
-    <div class="container-fluid">
-        <a href="https://github.com/login?return_to=%2Fhbvj99%2Fkathmandu-air" class="btn btn-primary text-center text-uppercase"
-            role="button" target="_blank"><i class="fab fa-github fa-lg"></i> Fork project</a>
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 id="pageTitle" class="fw-bold">Live Air Quality (PM2.5) – Kathmandu</h2>
+    <a href="http://github.com/hbvj99/kathmandu-air" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
+      VIEW SOURCE-CODE
+    </a>
+  </div>
+
+  <!-- Health Message -->
+  <div class="alert alert-warning border-start border-4 rounded mb-4">
+    <h5 class="fw-bold text-uppercase">Health Message for Current Air!</h5>
+    <div id="health_message">Updating...</div>
+  </div>
+
+  <!-- Controls -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <label class="form-label">Location</label>
+      <select id="locationSelect" class="form-select" onchange="fetchPollutionData()">
+        <option value="525">Bhaisipati</option>
+        <option value="502">Bhaktapur</option>
+        <option value="98">Pulchowk</option>
+        <option value="4" selected>Ratnapark</option>
+        <option value="480">Kirtipur</option>
+        <option value="542">Shankha Park</option>
+      </select>
     </div>
-    <div class="container-fluid">
-        <script src="js/canvasjs.min.js"></script></br>
-        <div class="alert alert-warning">
-            <h4 class="alert-heading text-uppercase">health message for current air!</h4>
-            <div id="health_message" class="card text-justify" style="padding: 30px;">Updating...</div>
-        </div>
-        <div id="live_data" class="container" style="margin: 13px;padding: 10px;">
-            <div class="form-group d-inline-block">
-                <label for="loc_nm">Location</label>
-                <select id="loc_nm" class="btn btn-outline-secondary dropdown-toggle" style="font-size: 15px;"
-                    onchange="changeLocation(this.value)" aria-haspopup="true" aria-expanded="false">
-                    <option class="dropdown-item" value="Lazimpat Kathmandu" type="button">Durbar Marg, Kathmandu
-                    </option>
-                    <option class="dropdown-item" value="US Embassy Kathmandu" type="button">Maharajgunj, Kathmandu
-                    </option>
-                </select>
-            </div>
-            <div class="form-group d-inline-block">
-                <label for="air_properties">Property</label>
-                <select id="air_properties" class="btn btn-outline-secondary dropdown-toggle" style="font-size: 15px;"
-                    onchange="onchangeConc(this.value)" aria-haspopup="true" aria-expanded="false">
-                    <option class="dropdown-item" value="AQI" type="button">AQI</option>
-                    <option class="dropdown-item" value="Conc" type="button">PM2.5 Raw Concentration</option>
-                    <option class="dropdown-item" value="NowCastConc" type="button">PM2.5 NowCast Concentration</option>
-                </select>
-            </div>
-            <div class="form-group d-inline-block">
-                <label for="chartType">Chart Type</label>
-                <select id="chartType" class="btn btn-outline-secondary dropdown-toggle" style="font-size: 15px;"
-                    onchange="changeType(this.value)" aria-haspopup="true" aria-expanded="false">
-                    <option class="dropdown-item" value="column" type="button">Column</option>
-                    <option class="dropdown-item" value="bar" type="button">Bar</option>
-                    <option class="dropdown-item" value="line" type="button">Line</option>
-                    <option class="dropdown-item" value="pie" type="button">Pie</option>
-                    <option class="dropdown-item" value="area" type="button">Area</option>
-                    <option class="dropdown-item" value="bubble" type="button">Bubble</option>
-                    <option class="dropdown-item" value="doughnut" type="button">Doughnut</option>
-                    <option class="dropdown-item" value="spline" type="button">Spline</option>
-                    <option class="dropdown-item" value="splineArea" type="button">Spline Area</option>
-                    <option class="dropdown-item" value="scatter" type="button">Scatter</option>
-                    <option class="dropdown-item" value="stackedArea" type="button">Stacked Area</option>
-                    <option class="dropdown-item" value="stackedBar100" type="button">Stacked Bar</option>
-                    <option class="dropdown-item" value="stepLine" type="button">Step Line</option>
-                    <option class="dropdown-item" value="stepArea" type="button">Step Area</option>
-                    <option class="dropdown-item" value="pyramid" type="button">Pyramid</option>
-                    <option class="dropdown-item" value="funnel" type="button">Funnel</option>
-                    <option class="dropdown-item" value="waterfall" type="button">Waterfall</option>
-                </select>
-            </div>
-        </div>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-sm-9">
-                    <div id="chartContainer" style="height: 420px; width: 100%;"></div>
-                </div>
-                <div class="col-sm-3"><br><br>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Color</th>
-                                <th>AQI Level</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="background: #34e400;"></td>
-                                <td>0 - 50 Good</td>
-                            </tr>
-                            <tr>
-                                <td style="background: #fcff00;"></td>
-                                <td>51 - 100 Moderate</td>
-                            </tr>
-                            <tr>
-                                <td style="background: #f77e01;"></td>
-                                <td>101 - 150 Unhealthy for Sensitive Groups</td>
-                            </tr>
-                            <tr>
-                                <td style="background: #f61802;"></td>
-                                <td>151 - 200 Unhealthy</td>
-                            </tr>
-                            <tr>
-                                <td style="background: #8f3f97;"></td>
-                                <td>201 - 300 Very Unhealthy</td>
-                            </tr>
-                            <tr>
-                                <td style="background: #7e0623;"></td>
-                                <td>301 - 500 Hazardous</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div><br>
-            <div class="alert alert-secondary text-center" style="padding: 5px;">Note: Hover over the chart color to display tooltip info. Also, you can save the render information in images or PDF document.</div>
-        </div>
+    <div class="col-md-3">
+      <label class="form-label">Chart Type</label>
+      <select id="chartTypeSelect" class="form-select" onchange="fetchPollutionData()">
+        <option value="bar" selected>Bar</option>
+        <option value="line">Line</option>
+        <option value="radar">Radar</option>
+        <option value="doughnut">Doughnut</option>
+        <option value="scatter">Scatter</option>
+      </select>
     </div>
+    <div class="col-md-3">
+      <label class="form-label">Start Date</label>
+      <input type="datetime-local" id="startDate" class="form-control" onchange="fetchPollutionData()">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">End Date</label>
+      <input type="datetime-local" id="endDate" class="form-control" onchange="fetchPollutionData()">
+    </div>
+  </div>
+
+  <!-- Chart, Table -->
+  <div class="row g-4">
+    <div class="col-md-9">
+      <div class="bg-white p-3 rounded shadow chart-container d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">PM2.5 Hourly Chart</h5>
+          <button onclick="downloadChart()" class="btn btn-outline-success btn-sm">Download</button>
+        </div>
+        <canvas id="pmChart"></canvas>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="bg-white p-3 rounded shadow aqi-table-container">
+        <h5 class="text-center mb-3">AQI Levels</h5>
+        <table class="table table-bordered table-sm text-center table-fixed">
+          <thead>
+            <tr><th>Color</th><th>AQI Level</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="background:#34e400;" class="p-2"></td><td>0 - 50 Good</td></tr>
+            <tr><td style="background:#fcff00;" class="p-2"></td><td>51 - 100 Moderate</td></tr>
+            <tr><td style="background:#f77e01;" class="p-2"></td><td>101 - 150 Unhealthy for Sensitive Groups</td></tr>
+            <tr><td style="background:#f61802;" class="p-2"></td><td>151 - 200 Unhealthy</td></tr>
+            <tr><td style="background:#8f3f97;" class="p-2"></td><td>201 - 300 Very Unhealthy</td></tr>
+            <tr><td style="background:#7e0623;" class="p-2"></td><td>301 - 500 Hazardous</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-muted text-center mt-4 small">
+    Note: Hover over chart for tooltip. AQI index referenced from <a target="_blank" href="https://www.airnow.gov/aqi/aqi-basics/">airnow</a>
+  </div>
+</div>
+
+<script>
+  let chartInstance = null;
+
+  function getDefaultDateRange() {
+    const now = new Date();
+    const start = new Date();
+    start.setHours(1, 0, 0, 0);
+    const format = d => d.toISOString().slice(0, 16);
+    return { from: format(start), to: format(now) };
+  }
+
+  function getAQIColor(val) {
+    if (val < 0 || val > 500 || isNaN(val)) return "transparent"; // Avoid assigning color for invalid values
+    if (val <= 50) return "#34e400";
+    if (val <= 100) return "#fcff00";
+    if (val <= 150) return "#f77e01";
+    if (val <= 200) return "#f61802";
+    if (val <= 300) return "#8f3f97";
+    return "#7e0623";
+  }
+
+  function getHealthMessage(val) {
+    if (val <= 50) return "Good: Air quality is satisfactory.";
+    if (val <= 100) return "Moderate: Acceptable for most.";
+    if (val <= 150) return "Unhealthy for sensitive groups.";
+    if (val <= 200) return "Unhealthy: General public may be affected.";
+    if (val <= 300) return "Very Unhealthy: Health warnings issued.";
+    return "Hazardous: Everyone should avoid outdoor activity.";
+  }
+
+  function groupByHour(data) {
+    const hourly = {};
+    data.forEach(entry => {
+      const d = new Date(entry.datetime);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:00`;
+      if (!hourly[key]) hourly[key] = [];
+      hourly[key].push(parseFloat(entry.value));
+    });
+    return Object.entries(hourly).map(([hour, values]) => ({
+      hour,
+      avg: +(values.reduce((a, b) => a + b) / values.length).toFixed(1)
+    }));
+  }
+
+  function fetchPollutionData() {
+    const loc = document.getElementById("locationSelect").value;
+    const chartType = document.getElementById("chartTypeSelect").value;
+    const start = document.getElementById("startDate").value || getDefaultDateRange().from;
+    const end = document.getElementById("endDate").value || getDefaultDateRange().to;
+    const locText = document.getElementById("locationSelect").selectedOptions[0].text;
+    document.getElementById("pageTitle").innerText = `Live Air Quality (PM2.5) – ${locText}`;
+    const url = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
+
+    document.getElementById("health_message").innerText = "Fetching data...";
+
+    fetch(url)
+      .then(res => res.json())
+      .then(json => {
+        let raw = json?.data || [];
+        raw = raw.filter(entry => entry.value !== -999);
+
+        if (!raw.length) {
+          document.getElementById("health_message").innerText = "No valid data received from station.";
+          renderEmptyChart();
+          return;
+        }
+
+        const hourly = groupByHour(raw);
+        const labels = hourly.map(d => d.hour);
+        const data = hourly.map(d => d.avg);
+        const colors = data.map(val => {
+          return (val >= 0 && val <= 500) ? getAQIColor(val) : "transparent";
+        });
+
+        renderChart(labels, data, colors, chartType);
+
+        const lastVal = data.at(-1);
+
+        // Update health message for latest hour data
+        if (lastVal >= 0 && lastVal <= 500) {
+          document.getElementById("health_message").innerText = getHealthMessage(lastVal);
+        } else {
+          document.getElementById("health_message").innerText = "No valid data available.";
+        }
+      })
+      .catch(() => {
+        document.getElementById("health_message").innerText = "Error loading data.";
+        renderEmptyChart();
+      });
+  }
+
+  function renderChart(labels, data, colors, type) {
+    const ctx = document.getElementById("pmChart").getContext("2d");
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+      type,
+      data: {
+        labels,
+        datasets: [{
+          label: "PM2.5 (µg/m³)",
+          data,
+          backgroundColor: type === 'line' ? "rgba(52, 164, 235, 0.2)" : colors,
+          borderColor: "#2a4365",
+          borderWidth: 1,
+          fill: type !== 'bar',
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            bottom: 20
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 30,
+              autoSkip: true
+            }
+          },
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: "µg/m³"
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function renderEmptyChart() {
+    const ctx = document.getElementById("pmChart").getContext("2d");
+    if (chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: "PM2.5 (µg/m³)",
+          data: [],
+          backgroundColor: []
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  function downloadChart() {
+    const canvas = document.getElementById("pmChart");
+    const link = document.createElement("a");
+    link.download = "pm25_chart.jpg";
+    link.href = canvas.toDataURL("image/jpeg", 1.0);
+    link.click();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const { from, to } = getDefaultDateRange();
+    document.getElementById("startDate").value = from;
+    document.getElementById("endDate").value = to;
+    fetchPollutionData();
+  });
+</script>
+
 </body>
-
 </html>
