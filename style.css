@@ -1,0 +1,18 @@
+canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .chart-container {
+    height: 500px;
+  }
+  .aqi-table-container {
+    height: 500px;
+    overflow-y: auto;
+  }
+  .table-fixed thead th {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 1;
+  }
