@@ -1,105 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Live Air Quality, Pollution Visualization Dashboard | Kathmandu Valley</title>
+  <title>
+    Live Air Quality, Pollution Visualization Dashboard | Kathmandu Valley
+  </title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
+
 <body class="bg-light">
-
-<div class="container py-4">
-  <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 id="pageTitle" class="fw-bold">Live Air Quality (PM2.5) – Kathmandu</h2>
-    <a href="https://github.com/hbvj99/kathmandu-air" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
-      VIEW SOURCE-CODE
-    </a>
-  </div>
-
-  <!-- Health Message -->
-  <div class="alert alert-warning border-start border-4 rounded mb-4">
-    <h5 class="fw-bold text-uppercase">Health Message for Current Air!</h5>
-    <div id="health_message">Updating...</div>
-  </div>
-
-  <!-- Controls -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <label class="form-label">Location</label>
-      <select id="locationSelect" class="form-select" onchange="fetchPollutionData()">
-        <option value="525">Bhaisipati</option>
-        <option value="502">Bhaktapur</option>
-        <option value="98">Pulchowk</option>
-        <option value="4" selected>Ratnapark</option>
-        <option value="480">Kirtipur</option>
-        <option value="542">Shankha Park</option>
-      </select>
+  <div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 id="pageTitle" class="fw-bold">
+        Live Air Quality (PM2.5) – Kathmandu
+      </h2>
+      <a href="https://github.com/hbvj99/kathmandu-air" target="_blank"
+        class="btn btn-primary d-flex align-items-center gap-2">
+        VIEW SOURCE-CODE
+      </a>
     </div>
-    <div class="col-md-3">
-      <label class="form-label">Chart Type</label>
-      <select id="chartTypeSelect" class="form-select" onchange="fetchPollutionData()">
-        <option value="bar" selected>Bar</option>
-        <option value="line">Line</option>
-        <option value="radar">Radar</option>
-        <option value="doughnut">Doughnut</option>
-        <option value="scatter">Scatter</option>
-      </select>
-    </div>
-    <div class="col-md-3">
-      <label class="form-label">Start Date</label>
-      <input type="datetime-local" id="startDate" class="form-control" onchange="fetchPollutionData()">
-    </div>
-    <div class="col-md-3">
-      <label class="form-label">End Date</label>
-      <input type="datetime-local" id="endDate" class="form-control" onchange="fetchPollutionData()">
-    </div>
-  </div>
 
-  <!-- Chart, Table -->
-  <div class="row g-4">
-    <div class="col-md-9">
-      <div class="bg-white p-3 rounded shadow chart-container d-flex flex-column">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0">PM2.5 Hourly Chart</h5>
-          <button onclick="downloadChart()" class="btn btn-outline-success btn-sm">Download</button>
+    <!-- Health Message -->
+    <div class="alert alert-warning border-start border-4 rounded mb-4">
+      <h5 class="fw-bold text-uppercase">Health Message for Current Air!</h5>
+      <div id="health_message">Updating...</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <label class="form-label">Location</label>
+        <select id="locationSelect" class="form-select" onchange="fetchPollutionData()">
+          <option value="525">Bhaisipati</option>
+          <option value="502">Bhaktapur</option>
+          <option value="98">Pulchowk</option>
+          <option value="4" selected>Ratnapark</option>
+          <option value="480">Kirtipur</option>
+          <option value="542">Shankha Park</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Chart Type</label>
+        <select id="chartTypeSelect" class="form-select" onchange="fetchPollutionData()">
+          <option value="bar" selected>Bar</option>
+          <option value="line">Line</option>
+          <option value="radar">Radar</option>
+          <option value="bubble">Bubble</option>
+          <!-- Similar to scatter -->
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Start Date</label>
+        <input type="datetime-local" id="startDate" class="form-control" onchange="fetchPollutionData()" />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">End Date</label>
+        <input type="datetime-local" id="endDate" class="form-control" onchange="fetchPollutionData()" />
+      </div>
+    </div>
+
+    <!-- Chart, Table -->
+    <div class="row g-4">
+      <div class="col-md-9">
+        <div class="bg-white p-3 rounded shadow chart-container d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">PM2.5 Hourly Chart</h5>
+            <button onclick="downloadChart()" class="btn btn-outline-success btn-sm">
+              Download
+            </button>
+          </div>
+          <canvas id="pmChart"></canvas>
         </div>
-        <canvas id="pmChart"></canvas>
+      </div>
+
+      <div class="col-md-3">
+        <div class="bg-white p-3 rounded shadow aqi-table-container">
+          <h5 class="text-center mb-3">AQI Levels</h5>
+          <table class="table table-bordered table-sm text-center table-fixed">
+            <thead>
+              <tr>
+                <th>Color</th>
+                <th>AQI Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="background: #34e400" class="p-2"></td>
+                <td>0 - 50 Good</td>
+              </tr>
+              <tr>
+                <td style="background: #fcff00" class="p-2"></td>
+                <td>51 - 100 Moderate</td>
+              </tr>
+              <tr>
+                <td style="background: #f77e01" class="p-2"></td>
+                <td>101 - 150 Unhealthy for Sensitive Groups</td>
+              </tr>
+              <tr>
+                <td style="background: #f61802" class="p-2"></td>
+                <td>151 - 200 Unhealthy</td>
+              </tr>
+              <tr>
+                <td style="background: #8f3f97" class="p-2"></td>
+                <td>201 - 300 Very Unhealthy</td>
+              </tr>
+              <tr>
+                <td style="background: #7e0623" class="p-2"></td>
+                <td>301 - 500 Hazardous</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="bg-white p-3 rounded shadow aqi-table-container">
-        <h5 class="text-center mb-3">AQI Levels</h5>
-        <table class="table table-bordered table-sm text-center table-fixed">
-          <thead>
-            <tr><th>Color</th><th>AQI Level</th></tr>
-          </thead>
-          <tbody>
-            <tr><td style="background:#34e400;" class="p-2"></td><td>0 - 50 Good</td></tr>
-            <tr><td style="background:#fcff00;" class="p-2"></td><td>51 - 100 Moderate</td></tr>
-            <tr><td style="background:#f77e01;" class="p-2"></td><td>101 - 150 Unhealthy for Sensitive Groups</td></tr>
-            <tr><td style="background:#f61802;" class="p-2"></td><td>151 - 200 Unhealthy</td></tr>
-            <tr><td style="background:#8f3f97;" class="p-2"></td><td>201 - 300 Very Unhealthy</td></tr>
-            <tr><td style="background:#7e0623;" class="p-2"></td><td>301 - 500 Hazardous</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="text-muted text-center mt-4 small">
+      Note: Hover over chart for tooltip. AQI index referenced from
+      <a target="_blank" href="https://www.airnow.gov/aqi/aqi-basics/">airnow</a>
     </div>
   </div>
 
-  <div class="text-muted text-center mt-4 small">
-    Note: Hover over chart for tooltip. AQI index referenced from <a target="_blank" href="https://www.airnow.gov/aqi/aqi-basics/">airnow</a>
-  </div>
-</div>
-
-<!-- JavaScript - Moved to end for better loading -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-<script src="script.js" defer></script>
-
+  <!-- JavaScript - Moved to end for better loading -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
+
 </html>
