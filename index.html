@@ -15,78 +15,103 @@
 
   <body class="bg-light">
     <div class="container py-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 id="pageTitle" class="fw-bold"></h2>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 id="pageTitle" class="fw-bold">Kathmandu Valley Air Dashboard</h2>
         <a
           href="https://github.com/hbvj99/kathmandu-air"
           target="_blank"
           class="btn btn-primary d-flex align-items-center gap-2"
-          >Fork Project
-        </a>
+          >Fork project</a
+        >
       </div>
 
-      <!-- Dynamic AQI Alert -->
-      <div id="aqiAlert" class="alert rounded">
+      <!-- Alert -->
+      <div id="aqiAlert" class="alert rounded mb-4">
         <h5 class="fw-bold text-uppercase">Air Health Message</h5>
         <div id="health_message">Updating...</div>
       </div>
 
-      <div class="row g-3 mb-4">
-        <div class="col-md-3">
-          <label class="form-label">Location</label>
-          <select
-            id="locationSelect"
-            class="form-select"
-            onchange="fetchPollutionData()"
-          >
-            <option value="4" selected>Ratnapark</option>
-            <option value="525">Bhaisipati</option>
-            <option value="503">Bhaktapur</option>
-            <option value="542">Shankha Park</option>
-            <option value="2482">Khumaltar</option>
-            <option value="98">Pulchowk</option>
-            <option value="480">Kirtipur</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Chart Type</label>
-          <select
-            id="chartTypeSelect"
-            class="form-select"
-            onchange="fetchPollutionData()"
-          >
-            <option value="bar" selected>Bar</option>
-            <option value="line">Line</option>
-            <option value="radar">Radar</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Start Date</label>
-          <input
-            type="datetime-local"
-            id="startDate"
-            class="form-control"
-            onchange="fetchPollutionData()"
-          />
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">End Date</label>
-          <input
-            type="datetime-local"
-            id="endDate"
-            class="form-control"
-            onchange="fetchPollutionData()"
-          />
+      <!-- Filters -->
+      <div class="card mb-3">
+        <div class="card-header"><strong>Filters</strong></div>
+        <div class="card-body row g-2">
+          <div class="col-md-3 col-lg-2">
+            <label class="form-label">Location</label>
+            <select
+              id="locationSelect"
+              class="form-select form-select-sm"
+              onchange="fetchPollutionData()"
+            >
+              <option value="4" selected>Ratnapark</option>
+              <option value="525">Bhaisipati</option>
+              <option value="503">Bhaktapur</option>
+              <option value="542">Shankha Park</option>
+              <option value="2482">Khumaltar</option>
+              <option value="98">Pulchowk</option>
+              <option value="480">Kirtipur</option>
+            </select>
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="form-label">Chart Type</label>
+            <select
+              id="chartTypeSelect"
+              class="form-select form-select-sm"
+              onchange="fetchPollutionData()"
+            >
+              <option value="bar" selected>Bar</option>
+              <option value="line">Line</option>
+              <option value="area">Area</option>
+              <option value="radar">Radar</option>
+              <option value="polarArea">Polar Area</option>
+              <option value="doughnut">Doughnut</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 col-lg-2">
+            <label class="form-label">Start Date</label>
+            <input
+              type="datetime-local"
+              id="startDate"
+              class="form-control form-control-sm"
+              onchange="fetchPollutionData()"
+            />
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="form-label">End Date</label>
+            <input
+              type="datetime-local"
+              id="endDate"
+              class="form-control form-control-sm"
+              onchange="fetchPollutionData()"
+            />
+          </div>
+          <div class="col-md-3 col-lg-2">
+            <label class="form-label">Group By</label>
+            <select
+              id="groupBySelect"
+              class="form-select form-select-sm"
+              onchange="fetchPollutionData()"
+            >
+              <option value="minute">Minute</option>
+              <option value="half-hour" selected>Half Hour</option>
+              <option value="hour">Hour</option>
+              <option value="day">Day</option>
+              <option value="week">Week</option>
+              <option value="month">Month</option>
+              <option value="year">Year</option>
+            </select>
+          </div>
         </div>
       </div>
 
+      <!-- Chart, AQI Table -->
       <div class="row g-4">
         <div class="col-md-9">
           <div
             class="bg-white p-3 rounded shadow chart-container d-flex flex-column"
           >
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0">AQI Hourly Chart</h5>
+              <h5 class="mb-0">AQI Visualization</h5>
               <button
                 onclick="downloadChart()"
                 class="btn btn-outline-success btn-sm"
@@ -100,10 +125,8 @@
 
         <div class="col-md-3">
           <div class="bg-white p-3 rounded shadow aqi-table-container">
-            <h5 class="text-center mb-3">AQI Levels</h5>
-            <table
-              class="table table-bordered table-sm text-center table-fixed"
-            >
+            <h5 class="text-center mb-3">AQI Index</h5>
+            <table class="table table-bordered table-sm table-fixed">
               <thead>
                 <tr>
                   <th>Color</th>
@@ -121,7 +144,7 @@
                 </tr>
                 <tr>
                   <td style="background: #f77e01" class="p-2"></td>
-                  <td>101 - 150 Unhealthy for Sensitive Groups</td>
+                  <td>101 - 150 Sensitive</td>
                 </tr>
                 <tr>
                   <td style="background: #f61802" class="p-2"></td>
@@ -142,9 +165,9 @@
       </div>
 
       <div class="text-muted text-center mt-4 small">
-        Note: Hover over chart for tooltip. AQI index referenced from
+        Note: AQI index referenced from EPA
         <a target="_blank" href="https://www.airnow.gov/aqi/aqi-basics/"
-          >airnow</a
+          >AirNow</a
         >
       </div>
     </div>

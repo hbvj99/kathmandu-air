@@ -9,7 +9,7 @@ function getDefaultDateRange() {
   return { from: format(start), to: format(now) };
 }
 
-// Convert PM2.5 (µg/m³) to AQI using US EPA breakpoint scale
+// Convert PM2.5 (µg/m³) to AQI
 // https://www.airnow.gov/aqi/aqi-basics/
 function pm25ToAQI(pm) {
   const breakpoints = [
@@ -30,27 +30,26 @@ function pm25ToAQI(pm) {
       );
     }
   }
-
-  return -1; // Invalid PM2.5
+  return -1;
 }
 
-// Get background color based on AQI level
+// AQI color
 function getAQIColor(val) {
   if (val < 0 || val > 500 || isNaN(val)) return "transparent";
-  if (val <= 50) return "#34e400"; // Good
-  if (val <= 100) return "#fcff00"; // Moderate
-  if (val <= 150) return "#f77e01"; // Sensitive
-  if (val <= 200) return "#f61802"; // Unhealthy
-  if (val <= 300) return "#8f3f97"; // Very unhealthy
-  return "#7e0623"; // Hazardous
+  if (val <= 50) return "#34e400";
+  if (val <= 100) return "#fcff00";
+  if (val <= 150) return "#f77e01";
+  if (val <= 200) return "#f61802";
+  if (val <= 300) return "#8f3f97";
+  return "#7e0623";
 }
 
-// Get health message text based on AQI level
+// AQI health message
 function getHealthMessage(val) {
   if (val <= 50)
     return "Good: Air quality is satisfactory, and air pollution poses little or no risk.";
   if (val <= 100)
-    return "Moderate: Air quality is acceptable. However, there may be a risk for some people, particularly those who are unusually sensitive to air pollution.";
+    return "Moderate: Air quality is acceptable. However, there may be a risk for some people.";
   if (val <= 150)
     return "Unhealthy for Sensitive Groups: Members of sensitive groups may experience health effects. The general public is less likely to be affected.";
   if (val <= 200)
@@ -60,18 +59,40 @@ function getHealthMessage(val) {
   return "Hazardous: Health warning of emergency conditions: everyone is more likely to be affected.";
 }
 
-// Group data to 30minute intervals and average PM2.5 and AQI
-function groupByHalfHour(data) {
+// Grouping logic
+function groupData(data, groupBy) {
   const grouped = {};
+
   data.forEach((entry) => {
     const d = new Date(entry.datetime);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(
-      2,
-      "0"
-    )}:${d.getMinutes() < 30 ? "00" : "30"}`;
+    let key;
+
+    switch (groupBy) {
+      case "minute":
+        key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+        break;
+      case "half-hour":
+        key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours()}:${
+          d.getMinutes() < 30 ? "00" : "30"
+        }`;
+        break;
+      case "hour":
+        key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()} ${d.getHours()}:00`;
+        break;
+      case "day":
+        key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        break;
+      case "week":
+        key = `${d.getFullYear()}-W${getWeekNumber(d)}`;
+        break;
+      case "month":
+        key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        break;
+      case "year":
+        key = `${d.getFullYear()}`;
+        break;
+    }
+
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push({
       raw: parseFloat(entry.value),
@@ -90,16 +111,30 @@ function groupByHalfHour(data) {
   });
 }
 
-// Fetch air pollution data and render chart
+function getWeekNumber(date) {
+  const d = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  );
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+// Main data fetcher
 function fetchPollutionData() {
   const loc = document.getElementById("locationSelect").value;
   const chartType = document.getElementById("chartTypeSelect").value;
+  const groupBy = document.getElementById("groupBySelect").value;
+
   const start =
     document.getElementById("startDate").value || getDefaultDateRange().from;
   const end =
     document.getElementById("endDate").value || getDefaultDateRange().to;
+
   const locText =
     document.getElementById("locationSelect").selectedOptions[0].text;
+
   const url = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
 
   const aqiAlert = document.getElementById("aqiAlert");
@@ -109,8 +144,9 @@ function fetchPollutionData() {
     .then((res) => res.json())
     .then((json) => {
       let raw = json?.data || [];
-      raw = raw.filter((entry) => entry.value !== -999);
-
+      raw = raw.filter(
+        (entry) => typeof entry.value === "number" && entry.value >= 0
+      );
       if (!raw.length) {
         document.getElementById("health_message").innerText =
           "No valid data received from station.";
@@ -123,21 +159,18 @@ function fetchPollutionData() {
         return;
       }
 
-      const halfHourly = groupByHalfHour(raw);
-      const labels = halfHourly.map((d) => d.hour);
-      const data = halfHourly.map((d) => d.aqi);
+      const grouped = groupData(raw, groupBy);
+      const labels = grouped.map((d) => d.hour);
+      const data = grouped.map((d) => d.aqi);
       const colors = data.map(getAQIColor);
-      const lastVal = halfHourly.at(-1)?.aqi;
+      const lastVal = grouped.at(-1)?.aqi;
 
-      // Update chart
-      renderChart(labels, data, colors, chartType, halfHourly);
+      renderChart(labels, data, colors, chartType, grouped);
 
-      // Update title
       document.getElementById("pageTitle").innerText =
         `Live Air Quality – ${locText}` +
         (lastVal >= 0 ? ` (AQI: ${lastVal})` : "");
 
-      // Update message, background
       if (lastVal >= 0 && lastVal <= 500) {
         document.getElementById("health_message").innerText =
           getHealthMessage(lastVal);
@@ -153,33 +186,49 @@ function fetchPollutionData() {
     .catch(() => {
       document.getElementById("health_message").innerText =
         "Error loading data from station.";
-      document.getElementById(
-        "pageTitle"
-      ).innerText = `Live Air Quality – ${locText}`;
       aqiAlert.style.backgroundColor = "red";
       aqiAlert.style.color = "white";
       renderEmptyChart();
     });
 }
 
-// Render chart
+// Chart rendering
 function renderChart(labels, data, colors, type, rawData) {
   const ctx = document.getElementById("pmChart").getContext("2d");
   if (chartInstance) chartInstance.destroy();
 
+  const lastAQI = rawData.at(-1)?.aqi || 100;
+  const defaultColor = getAQIColor(lastAQI);
+  const isLineType = type === "line" || type === "area";
+  const chartBaseType = type === "area" ? "line" : type;
+
   chartInstance = new Chart(ctx, {
-    type: type === "area" ? "line" : type,
+    type: chartBaseType,
     data: {
       labels,
       datasets: [
         {
           label: "AQI",
-          data,
-          backgroundColor: type === "line" ? "rgba(52, 164, 235, 0.2)" : colors,
-          borderColor: type === "line" ? "#2a4365" : colors,
-          borderWidth: 1,
-          fill: type !== "bar",
+          data: rawData.map((d) => d.aqi),
+          backgroundColor: isLineType ? defaultColor + "33" : colors,
+          borderColor: isLineType ? defaultColor : colors,
+          borderWidth: 2,
+          fill: type === "area",
           tension: 0.3,
+          pointBackgroundColor: isLineType ? colors : undefined,
+          yAxisID: "y",
+        },
+        {
+          label: "PM2.5 (µg/m³)",
+          data: rawData.map((d) => d.raw),
+          backgroundColor: "rgba(100,100,100,0.1)",
+          borderColor: "gray",
+          borderWidth: 2,
+          tension: 0.3,
+          fill: false,
+          pointRadius: 0,
+          yAxisID: "y1",
+          hidden: true, // default hidden
         },
       ],
     },
@@ -187,38 +236,60 @@ function renderChart(labels, data, colors, type, rawData) {
       responsive: true,
       maintainAspectRatio: false,
       layout: { padding: { bottom: 20 } },
-      scales: {
-        x: {
-          ticks: {
-            callback: function (value) {
-              const label = this.getLabelForValue(value);
-              const date = new Date(label);
-              return `${date.getHours().toString().padStart(2, "0")}:${date
-                .getMinutes()
-                .toString()
-                .padStart(2, "0")}`;
-            },
-          },
-        },
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: "AQI" },
-        },
+      interaction: {
+        mode: "index",
+        intersect: false,
       },
+      scales:
+        type === "doughnut" || type === "polarArea"
+          ? {}
+          : {
+              x: {
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 30,
+                  autoSkip: true,
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "AQI" },
+              },
+              y1: {
+                beginAtZero: true,
+                position: "right",
+                display: false,
+                title: { display: true, text: "PM2.5 (µg/m³)" },
+                grid: { drawOnChartArea: false },
+              },
+            },
       plugins: {
         tooltip: {
+          mode: "index",
+          intersect: false,
           callbacks: {
-            label: function () {
-              return "";
-            },
             afterBody: function (items) {
               const idx = items[0].dataIndex;
               return [
-                `PM2.5: ${rawData[idx].raw} µg/m³`,
-                `AQI: ${rawData[idx].aqi}`,
                 `Category: ${getHealthMessage(rawData[idx].aqi).split(":")[0]}`,
               ];
             },
+          },
+        },
+        legend: {
+          onClick: (e, legendItem, legend) => {
+            const index = legendItem.datasetIndex;
+            const ci = legend.chart;
+            const meta = ci.getDatasetMeta(index);
+
+            // Toggle y1 axis display PM2.5 dataset visibility
+            meta.hidden = !meta.hidden;
+            if (legendItem.text === "PM2.5 (µg/m³)") {
+              const y1 = ci.options.scales.y1;
+              y1.display = !meta.hidden;
+            }
+
+            ci.update();
           },
         },
       },
@@ -226,7 +297,7 @@ function renderChart(labels, data, colors, type, rawData) {
   });
 }
 
-// Render empty chart if no data, error
+// Empty fallback chart
 function renderEmptyChart() {
   const ctx = document.getElementById("pmChart").getContext("2d");
   if (chartInstance) chartInstance.destroy();
@@ -262,9 +333,27 @@ function downloadChart() {
   link.click();
 }
 
+// Execute page load
 document.addEventListener("DOMContentLoaded", () => {
-  const { from, to } = getDefaultDateRange();
-  document.getElementById("startDate").value = from;
-  document.getElementById("endDate").value = to;
+  const now = new Date();
+  const start = new Date();
+
+  // Set start to today at 1:00 AM
+  start.setHours(1, 0, 0, 0);
+
+  // Use format: "YYYY-MM-DDTHH:MM"
+  const toDatetimeLocal = (dt) => {
+    const offset = dt.getTimezoneOffset();
+    const local = new Date(dt.getTime() - offset * 60 * 1000);
+    return local.toISOString().slice(0, 16);
+  };
+
+  const startInput = document.getElementById("startDate");
+  const endInput = document.getElementById("endDate");
+
+  if (startInput && endInput) {
+    startInput.value = toDatetimeLocal(start);
+    endInput.value = toDatetimeLocal(now);
+  }
   fetchPollutionData();
 });
