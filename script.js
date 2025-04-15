@@ -135,7 +135,9 @@ function fetchPollutionData() {
   const locText =
     document.getElementById("locationSelect").selectedOptions[0].text;
 
-  const url = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
+  # use proxy
+  const base_url = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
+  const url = `https://thingproxy.freeboard.io/fetch/${base_url}`;
 
   const aqiAlert = document.getElementById("aqiAlert");
   document.getElementById("health_message").innerText = "Fetching data...";
