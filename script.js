@@ -145,7 +145,7 @@ function fetchPollutionData() {
 
   // Use proxy to fix SSL issue
   const rawUrl = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
-  const url = `http://proxy.vijaypathak.com.np/proxy/${encodeURIComponent(
+  const url = `https://proxy.vijaypathak.com.np/proxy/${encodeURIComponent(
     toBase64(rawUrl)
   )}`;
 
