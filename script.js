@@ -143,9 +143,11 @@ function fetchPollutionData() {
   // Original url to test locally
   // const url = `http://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
 
-  // Use proxy
+  // Use proxy to fix SSL issue
   const rawUrl = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
-  const url = `https://proxy-express.onrender.com/proxy/${toBase64(rawUrl)}`;
+  const url = `https://proxy-express.onrender.com/proxy/${encodeURIComponent(
+    toBase64(rawUrl)
+  )}`;
 
   const aqiAlert = document.getElementById("aqiAlert");
   document.getElementById("health_message").innerText = "Fetching data...";
