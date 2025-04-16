@@ -135,12 +135,17 @@ function fetchPollutionData() {
   const locText =
     document.getElementById("locationSelect").selectedOptions[0].text;
 
+  // base64 encode
+  function toBase64(str) {
+    return btoa(str); 
+  }
+
   // Original url to test locally
   // const url = `http://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
 
   // Use proxy
   const rawUrl = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
-  const url = `https://proxy-express.onrender.com/proxy?b64=${toBase64(rawUrl)}`
+  const url = `https://proxy-express.onrender.com/proxy?b64=${toBase64(rawUrl)}`;
 
   const aqiAlert = document.getElementById("aqiAlert");
   document.getElementById("health_message").innerText = "Fetching data...";
