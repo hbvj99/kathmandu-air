@@ -25,7 +25,7 @@ function pm25ToAQI(pm) {
     if (pm >= bp.cLow && pm <= bp.cHigh) {
       return Math.round(
         ((bp.aqiHigh - bp.aqiLow) / (bp.cHigh - bp.cLow)) * (pm - bp.cLow) +
-          bp.aqiLow
+        bp.aqiLow
       );
     }
   }
@@ -111,13 +111,13 @@ function groupData(data, groupBy) {
 
 // Fetch and render
 function fetchPollutionData() {
-  const loc       = document.getElementById("locationSelect").value;
+  const loc = document.getElementById("locationSelect").value;
   const chartType = document.getElementById("chartTypeSelect").value;
-  const groupBy   = document.getElementById("groupBySelect").value;
-  const start     = document.getElementById("startDate").value || getDefaultDateRange().from;
-  const end       = document.getElementById("endDate").value   || getDefaultDateRange().to;
-  const locText   = document.getElementById("locationSelect").selectedOptions[0].text;
-  const alertEl   = document.getElementById("aqiAlert");
+  const groupBy = document.getElementById("groupBySelect").value;
+  const start = document.getElementById("startDate").value || getDefaultDateRange().from;
+  const end = document.getElementById("endDate").value || getDefaultDateRange().to;
+  const locText = document.getElementById("locationSelect").selectedOptions[0].text;
+  const alertEl = document.getElementById("aqiAlert");
 
   // use for locally/test
   const rawUrl = `https://pollution.gov.np/gss/api/observation?series_id=${loc}&date_from=${start}:00&date_to=${end}:00`;
@@ -125,7 +125,7 @@ function fetchPollutionData() {
   // fallback
   const proxyUrl = `https://proxy.vijaypathak.com.np/proxy/${encodeURIComponent(btoa(rawUrl))}`;
 
-  const tryFetch = (url) => 
+  const tryFetch = (url) =>
     fetch(url)
       .then((r) => {
         if (!r.ok) throw new Error("Network error");
@@ -213,19 +213,19 @@ function renderChart(rawData, type) {
         type === "doughnut" || type === "polarArea"
           ? {}
           : {
-              x: {
-                offset: true,
-                ticks: { autoSkip: true, maxRotation: 45, padding: 10 },
-              },
-              y: { beginAtZero: true, title: { display: true, text: "AQI" } },
-              y1: {
-                beginAtZero: true,
-                position: "right",
-                display: false,
-                title: { display: true, text: "PM2.5 (µg/m³)" },
-                grid: { drawOnChartArea: false },
-              },
+            x: {
+              offset: true,
+              ticks: { autoSkip: true, maxRotation: 45, padding: 10 },
             },
+            y: { beginAtZero: true, title: { display: true, text: "AQI" } },
+            y1: {
+              beginAtZero: true,
+              position: "right",
+              display: false,
+              title: { display: true, text: "PM2.5 (µg/m³)" },
+              grid: { drawOnChartArea: false },
+            },
+          },
       plugins: {
         tooltip: {
           callbacks: {
@@ -256,7 +256,7 @@ function renderEmptyChart() {
   const ctx = document.getElementById("pmChart").getContext("2d");
   if (chartInstance) chartInstance.destroy();
   chartInstance = new Chart(ctx, {
-    type: "",
+    type: "bar",
     data: {
       labels: [],
       datasets: [{ label: "AQI", data: [], backgroundColor: [] }],
